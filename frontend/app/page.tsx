@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import axios from "axios";
-import Form from "@/components/Form";
 import { NAVIGATION } from "@/utils/constant";
-import { IProduct } from "@/types/form";
+import Link from "next/link";
 
 // ToDo
 // Retrive Products from DB
@@ -14,53 +12,6 @@ import { IProduct } from "@/types/form";
 
 export default function Example() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSearched, setIsSearched] = useState(false);
-  const [showProducts, setShowProducts] = useState(false);
-  const [url, setUrl] = useState<string>("");
-  const [error, setError] = useState<string>("");
-  const [product, setProduct] = useState<IProduct | null>(null);
-  const [trackedProducts, setTrackedProducts] = useState<IProduct[]>([]);
-
-  useEffect(() => {
-    // Load tracked products from localStorage
-    const savedProducts = JSON.parse(
-      localStorage.getItem("trackedProducts") || "[]"
-    ) as IProduct[];
-    setTrackedProducts(savedProducts);
-  }, []);
-
-  const handleTrack = async () => {
-    try {
-      setIsLoading(true);
-      setIsSearched(true);
-      const { data } = await axios.post(
-        "/api/scrape",
-        JSON.stringify({ url }),
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      setProduct(data);
-      setError("");
-      setIsLoading(false);
-      // Save product to localStorage
-      const updatedProducts = [...trackedProducts, data];
-      setTrackedProducts(updatedProducts);
-      localStorage.setItem("trackedProducts", JSON.stringify(updatedProducts));
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      }
-      setIsLoading(false);
-      setProduct(null);
-    }
-  };
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setUrl(e.target.value);
-    setIsSearched(false);
-  };
 
   return (
     <>
@@ -173,15 +124,6 @@ export default function Example() {
             />
           </div>
           <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
-            {/* <div className="hidden sm:mb-8 sm:flex sm:justify-center">
-            <div className="relative rounded-full px-3 py-1 text-sm/6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
-              Announcing our next round of funding.{' '}
-              <a href="#" className="font-semibold text-indigo-600">
-                <span aria-hidden="true" className="absolute inset-0" />
-                Read more <span aria-hidden="true">&rarr;</span>
-              </a>
-            </div>
-          </div> */}
             <div className="text-center">
               <h1 className="text-balance text-5xl font-semibold tracking-tight text-gray-900 sm:text-7xl">
                 Price Push: Your Smart Tracker for Big Savings!
@@ -189,15 +131,15 @@ export default function Example() {
               <p className="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-xl/8">
                 {
                   "Keep an eye on your favorite products effortlessly. With Price Push, track prices from Amazon, Flipkart, and more in real-time, and get notified the moment there's a price drop. Smart shopping made simple! "
-                }{" "}
+                }
               </p>
               <div className="mt-10 flex items-center justify-center gap-x-6">
-                <a
-                  href="#"
+                <Link
+                  href="/track-product"
                   className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
-                  Get started
-                </a>
+                  Track a Product
+                </Link>
                 <a href="#" className="text-sm/6 font-semibold text-gray-900">
                   Learn more <span aria-hidden="true">→</span>
                 </a>
@@ -217,38 +159,6 @@ export default function Example() {
             />
           </div>
         </div>
-      </div>
-      <div style={{ minHeight: "100vh" }}>
-        <Form
-          isSearched={isSearched}
-          isLoading={isLoading}
-          product={product}
-          error={error}
-          handleInputChange={handleInputChange}
-          handleTrack={handleTrack}
-          url={url}
-          trackedProducts={trackedProducts}
-        />
-      </div>
-
-      <div className="w-screen h-screen">
-        <h3>
-          Tracked Products{" "}
-          <button onClick={() => setShowProducts(!showProducts)}>
-            Toggle History
-          </button>
-        </h3>
-        {showProducts && (
-          <ul>
-            {trackedProducts?.map((prod, index) => (
-              <li key={index}>
-                <img src={prod.image} alt={prod.title} width="50" />
-                <p>{prod.title}</p>
-                <p>Price: {prod.price}</p>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </>
   );
